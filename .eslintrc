@@ -1,0 +1,11 @@
+{
+  extends : "airbnb",
+  rules: {
+    semi: ["error", "never"],
+    max-len: ["error", { "ignorePattern": "d=\"M" }],
+    no-unused-vars: ["error", { "argsIgnorePattern": "^_" }]
+  },
+  env: {
+    browser: true
+  }
+}
