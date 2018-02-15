@@ -1,9 +1,23 @@
 const path = require('path')
 const webpack = require("webpack")
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const configFromName = (name) => {
-  const plugins = [new ExtractTextPlugin(`${name}.css`)]
+  const plugins = [
+    new webpack.HotModuleReplacementPlugin(),
+    new ExtractTextPlugin(`${name}.css`),
+    new HtmlWebpackPlugin({
+      template: 'html/index.html',
+      inject: false,
+      filename: 'index.html',
+    }),
+    new HtmlWebpackPlugin({
+      template: `html/${name}.html`,
+      inject: 'body',
+      filename: `${name}/index.html`,
+    }),
+  ]
   if (
     typeof process.env.nocompress === 'undefined' ||
     process.env.nocompress === ''
@@ -21,6 +35,14 @@ const configFromName = (name) => {
     entry: [`./src/apps/${name}.jsx`, `./src/css/${name}.css`],
     resolve: {
       extensions: ['.js', '.jsx'],
+    },
+    devServer: {
+      contentBase: path.join(__dirname, "build"),
+      disableHostCheck: true,
+      host: "0.0.0.0",
+      hot: true,
+      port: 80,
+      progress: true,
     },
     module: {
       rules: [
@@ -54,8 +76,8 @@ const configFromName = (name) => {
       'prop-types': 'PropTypes',
     },
     output: {
-      filename: `${name}.js`,
-      path: path.resolve(__dirname, 'build') + '/js'
+      filename: `js/${name}.js`,
+      path: path.resolve(__dirname, 'build')
     },
     plugins: plugins
   }
