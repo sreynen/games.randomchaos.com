@@ -1,6 +1,7 @@
 language: node_js
 node_js:
 - 9.5.0
+script: npm run lint-and-test
 deploy:
   provider: s3
   access_key_id: AKIAI3WMB2DKHPVNU4NA

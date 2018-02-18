@@ -1,3 +1,5 @@
+import { sortNumber } from './general'
+
 const pipeTypeMap = {
   0: 'curve',
   1: 'straight',
@@ -24,9 +26,61 @@ const directionToRotate = {
   left: -90,
 }
 
+const pipeConnections = {
+  'curve-up': ['up', 'right'],
+  'curve-right': ['right', 'down'],
+  'curve-down': ['down', 'left'],
+  'curve-left': ['left', 'up'],
+  'straight-up': ['up', 'down'],
+  'straight-right': ['right', 'left'],
+  'straight-down': ['up', 'down'],
+  'straight-left': ['right', 'left'],
+}
+
+const maybeConnectedIndexes = (pipe, index, perRow) =>
+  pipeConnections[`${pipe.type}-${pipe.direction}`]
+    .reduce((currentIndexes, connection) => {
+      const i = parseInt(index, 10)
+      if (
+        connection === 'up' &&
+        i - perRow >= 0
+      ) {
+        return [...currentIndexes, i - perRow].sort(sortNumber)
+      }
+      if (
+        connection === 'down' &&
+        i + perRow < (perRow * perRow)
+      ) {
+        return [...currentIndexes, i + perRow].sort(sortNumber)
+      }
+      if (
+        connection === 'right' &&
+        (i + 1) % perRow !== 0 &&
+        i < ((perRow * perRow) - 1)
+      ) {
+        return [...currentIndexes, i + 1].sort(sortNumber)
+      }
+      if (
+        connection === 'left' &&
+        index % perRow !== 0 &&
+        index > 0
+      ) {
+        return [...currentIndexes, i - 1].sort(sortNumber)
+      }
+      return currentIndexes
+    }, [])
+
+const connectedIndexes = (pipes, index, perRow) =>
+  maybeConnectedIndexes(pipes[index], index, perRow).filter(
+    connected => maybeConnectedIndexes(pipes[connected], connected, perRow)
+      .includes(parseInt(index, 10)),
+  )
+
 export {
-  pipeTypeMap,
+  connectedIndexes,
   directionMap,
   directionMapReversed,
   directionToRotate,
+  maybeConnectedIndexes,
+  pipeTypeMap,
 }

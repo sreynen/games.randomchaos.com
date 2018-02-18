@@ -23,7 +23,7 @@ const PipesBoard = ({ clickHandler, perRow, pipes, pipeSize }) => {
         x={pipeSize * x}
         y={pipeSize * y}
         direction={pipe.direction}
-        fillColor="#99ccff"
+        fillColor={pipe.fillColor}
       />
     )
   })
