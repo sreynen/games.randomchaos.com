@@ -1,7 +1,6 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
-import { directionToRotate } from '../../../util/pipes'
+import { directionToRotate, pipePropTypes } from '../../../util/pipes'
 
 const Straight = ({ x, y, size, direction, fillColor }) => {
   const rotation = directionToRotate[direction]
@@ -31,12 +30,6 @@ const Straight = ({ x, y, size, direction, fillColor }) => {
   )
 }
 
-Straight.propTypes = {
-  x: PropTypes.number.isRequired,
-  y: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired,
-  direction: PropTypes.string.isRequired,
-  fillColor: PropTypes.string.isRequired,
-}
+Straight.propTypes = pipePropTypes
 
 export default Straight
