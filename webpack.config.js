@@ -3,9 +3,8 @@ const webpack = require("webpack")
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const configFromName = (name) => {
+const configFromName = (name, env) => {
   const plugins = [
-    new webpack.HotModuleReplacementPlugin(),
     new ExtractTextPlugin(`${name}.css`),
     new HtmlWebpackPlugin({
       template: 'html/index.html',
@@ -16,6 +15,7 @@ const configFromName = (name) => {
       template: `html/${name}.html`,
       inject: 'body',
       filename: `${name}/index.html`,
+      hash: true,
     }),
   ]
   if (
@@ -30,6 +30,9 @@ const configFromName = (name) => {
         beautify: false,
       },
     }))
+  }
+  if (!env.production) {
+    plugins.push(new webpack.HotModuleReplacementPlugin())
   }
   return {
     entry: [`./src/apps/${name}.jsx`, `./src/css/${name}.css`],
@@ -83,6 +86,6 @@ const configFromName = (name) => {
   }
 }
 
-module.exports = [
-  configFromName('pipes')
-]
+module.exports = (env) => ([
+  configFromName('pipes', env)
+])
