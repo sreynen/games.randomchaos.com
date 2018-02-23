@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import ClickableSquare from '../clickable-square'
 import SVG from '../svg'
 import Blank from './blank.svg'
+import Cap from './cap.svg'
 import Cross from './cross.svg'
 import Curve from './curve.svg'
 import Straight from './straight.svg'
@@ -15,6 +16,7 @@ const pipeTypeToComponent = {
   tee: Tee,
   blank: Blank,
   cross: Cross,
+  cap: Cap,
 }
 
 const PipesBoard = ({ clickHandler, perRow, pipes, pipeSize }) => {

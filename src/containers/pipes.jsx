@@ -1,35 +1,22 @@
 import React from 'react'
 
-import { intKeys, randomFromList } from '../util/general'
+import { intKeys } from '../util/general'
 import {
-  connectedIndexes, directionMap, directionMapReversed, pipeTypeMap,
+  connectedIndexes, directionMap, directionMapReversed,
+  cornerSources, singlePathBoard,
 } from '../util/pipes'
 import PipesBoard from '../components/svg/pipes/board.svg'
 
 class Pipes extends React.Component {
   constructor(props) {
-    const pipeTypes = Object.keys(pipeTypeMap)
-    const directions = Object.keys(directionMap)
-    const pipe = (fillColor = '#ffffff') => ({
-      type: pipeTypeMap[randomFromList(pipeTypes)],
-      direction: directionMap[randomFromList(directions)],
-      fillColor,
-    })
+    const perRow = 11
+    const sources = cornerSources
     super(props)
     this.state = {
-      pipes: [
-        pipe(), pipe(), pipe(), pipe(), pipe(), pipe('#99ccff'),
-        pipe(), pipe(), pipe(), pipe(), pipe(), pipe(),
-        pipe(), pipe(), pipe(), pipe(), pipe(), pipe(),
-        pipe(), pipe(), pipe(), pipe(), pipe(), pipe(),
-        pipe(), pipe(), pipe(), pipe(), pipe(), pipe(),
-        pipe(), pipe(), pipe(), pipe(), pipe(), pipe(),
-      ],
-      perRow: 6,
-      pipeSize: 40,
-      sources: {
-        5: '#99ccff',
-      },
+      pipes: singlePathBoard(perRow, sources),
+      perRow,
+      pipeSize: 30,
+      sources,
     }
     this.pipeClickHandler = this.pipeClickHandler.bind(this)
   }

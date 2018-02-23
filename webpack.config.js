@@ -31,7 +31,7 @@ const configFromName = (name, env) => {
       },
     }))
   }
-  if (!env.production) {
+  if (typeof env === 'undefined' || !env.production) {
     plugins.push(new webpack.HotModuleReplacementPlugin())
   }
   return {
