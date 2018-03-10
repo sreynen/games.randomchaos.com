@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 
-import { randomFromList, sortNumber } from './general'
+import { randomFromList, removeListFromList, sortNumber } from './general'
 
 const pipeTypeMap = {
   0: 'curve',
@@ -176,9 +176,6 @@ const randomBoard = (perRow, sources, board = []) => {
   )
 }
 
-const removeListFromList = (originalList, removals) =>
-  originalList.filter(item => !removals.includes(item))
-
 const randomNextPipeOnBoard = (perRow, sourceColor, board) => {
   let availablePipes = Object.keys(pipeConnections)
   const index = board.length
@@ -263,17 +260,38 @@ const singlePathBoard = (perRow, sources, board = []) => {
   )
 }
 
+const emptyPipes = pipes => pipes.map(pipe => ({
+  type: pipe.type,
+  direction: pipe.direction,
+  fillColor: '#ffffff',
+}))
+
+const uncheckedConnectedIndexes = (pipes, connection, perRow, unchecked) =>
+  connectedIndexes(pipes, connection, perRow)
+    .filter(edge => unchecked.includes(parseInt(edge, 10)))
+
+const copyPipeColor = (pipes, from, to) =>
+  pipes.map((pipe, index) => {
+    if (to.includes(index)) {
+      return {...pipe, fillColor: pipes[from].fillColor}
+    }
+    return pipe
+  })
+
 export {
   centerSource,
+  copyPipeColor,
   cornerSources,
   connectedIndexes,
   directionMap,
   directionMapReversed,
   directionToRotate,
+  emptyPipes,
   maybeConnectedIndexes,
   pipePropTypes,
   pipeTypeMap,
   randomBoard,
   randomPipe,
   singlePathBoard,
+  uncheckedConnectedIndexes,
 }

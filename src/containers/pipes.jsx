@@ -2,9 +2,10 @@ import React from 'react'
 
 import { intKeys } from '../util/general'
 import {
-  connectedIndexes, directionMap, directionMapReversed,
-  cornerSources, singlePathBoard,
+  connectedIndexes, copyPipeColor, cornerSources, directionMap,
+  directionMapReversed, emptyPipes, singlePathBoard, uncheckedConnectedIndexes
 } from '../util/pipes'
+import { removeListFromList } from '../util/general'
 import PipesBoard from '../components/svg/pipes/board.svg'
 
 class Pipes extends React.Component {
@@ -29,12 +30,8 @@ class Pipes extends React.Component {
 
   updateFillColors(pipes) {
     // Empty all pipes
-    const newPipes = pipes.map(pipe => ({
-      type: pipe.type,
-      direction: pipe.direction,
-      fillColor: '#ffffff',
-    }))
-    const uncheckedPipes = intKeys(pipes)
+    let newPipes = emptyPipes(pipes)
+    let uncheckedPipes = intKeys(pipes)
     let fillCheckEdges = intKeys(this.state.sources).map((index) => {
       newPipes[index].fillColor = this.state.sources[index]
       return index
@@ -44,21 +41,13 @@ class Pipes extends React.Component {
       let newFillCheckEdges = []
       let addFillCheckEdges = []
       fillCheckEdges.forEach((edgePipe) => {
-        // Mark current edge as checked
-        const uncheckedIndex = uncheckedPipes.indexOf(edgePipe)
-        if (uncheckedIndex > -1) {
-          uncheckedPipes.splice(uncheckedIndex, 1)
-        }
-        // Move to next unchecked edges
-        addFillCheckEdges = connectedIndexes(pipes, edgePipe, this.state.perRow)
-          .filter(edge => uncheckedPipes.includes(parseInt(edge, 10)))
-        // Copy fillColor from source
-        addFillCheckEdges.forEach((newEdgePipe) => {
-          newPipes[newEdgePipe].fillColor = newPipes[edgePipe].fillColor
-        })
+        uncheckedPipes = removeListFromList(uncheckedPipes, [edgePipe])
+        addFillCheckEdges = uncheckedConnectedIndexes(
+          pipes, edgePipe, this.state.perRow, uncheckedPipes,
+        )
+        newPipes = copyPipeColor(newPipes, edgePipe, addFillCheckEdges)
         newFillCheckEdges = newFillCheckEdges.concat(addFillCheckEdges)
       })
-
       fillCheckEdges = newFillCheckEdges
     }
     return newPipes
