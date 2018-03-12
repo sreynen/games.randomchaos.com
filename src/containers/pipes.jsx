@@ -1,11 +1,9 @@
 import React from 'react'
 
-import { intKeys } from '../util/general'
 import {
-  connectedIndexes, copyPipeColor, cornerSources, directionMap,
-  directionMapReversed, emptyPipes, singlePathBoard, uncheckedConnectedIndexes
+  cornerSources, directionMap, directionMapReversed, emptyPipes,
+  fillConnections, fillFromSources, singlePathBoard,
 } from '../util/pipes'
-import { removeListFromList } from '../util/general'
 import PipesBoard from '../components/svg/pipes/board.svg'
 
 class Pipes extends React.Component {
@@ -29,28 +27,11 @@ class Pipes extends React.Component {
   }
 
   updateFillColors(pipes) {
-    // Empty all pipes
-    let newPipes = emptyPipes(pipes)
-    let uncheckedPipes = intKeys(pipes)
-    let fillCheckEdges = intKeys(this.state.sources).map((index) => {
-      newPipes[index].fillColor = this.state.sources[index]
-      return index
-    })
-    // Fill everything connected to filled pipes
-    while (fillCheckEdges.length > 0) {
-      let newFillCheckEdges = []
-      let addFillCheckEdges = []
-      fillCheckEdges.forEach((edgePipe) => {
-        uncheckedPipes = removeListFromList(uncheckedPipes, [edgePipe])
-        addFillCheckEdges = uncheckedConnectedIndexes(
-          pipes, edgePipe, this.state.perRow, uncheckedPipes,
-        )
-        newPipes = copyPipeColor(newPipes, edgePipe, addFillCheckEdges)
-        newFillCheckEdges = newFillCheckEdges.concat(addFillCheckEdges)
-      })
-      fillCheckEdges = newFillCheckEdges
-    }
-    return newPipes
+    return fillConnections(
+      fillFromSources(
+        emptyPipes(pipes), this.state.sources,
+      ), this.state.perRow,
+    )
   }
 
   pipeClickHandler(x, y) {

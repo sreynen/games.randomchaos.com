@@ -1,11 +1,26 @@
-import { connectedIndexes, maybeConnectedIndexes } from '../../src/util/pipes'
+import {
+  centerSource, colorMap, connectedIndexes, connectedPipeIndexColorMap,
+  copyPipeColor, cornerSources, emptyPipes, fillConnections, fillFromSources,
+  filledPipeIndexes, indexesAsColorMap, maybeConnectedIndexes, pipeTypeMap,
+  randomBoard, randomNextPipeOnBoard, randomPipe, randomPipeType,
+  singlePathBoard,
+} from '../../src/util/pipes'
 
-const straightUpPipe = {type: 'straight', direction: 'up'}
-const curveUpPipe = {type: 'curve', direction: 'up'}
-const curveRightPipe = {type: 'curve', direction: 'right'}
-const straightRightPipe = {type: 'straight', direction: 'right'}
+let input, expectedResult
+const straightUpPipe = {
+  type: 'straight', direction: 'up', fillColor: colorMap.white
+}
+const curveUpPipe = {
+  type: 'curve', direction: 'up', fillColor: colorMap.white
+}
+const curveRightPipe = {
+  type: 'curve', direction: 'right', fillColor: colorMap.white
+}
+const straightRightPipe = {
+  type: 'straight', direction: 'right', fillColor: colorMap.white
+}
 const boardOne = [
-  curveUpPipe, straightRightPipe, curveUpPipe,
+  { ...curveUpPipe, fillColor: colorMap.blue }, straightRightPipe, curveUpPipe,
   straightUpPipe, curveUpPipe, straightUpPipe,
   curveUpPipe, straightRightPipe, curveUpPipe,
 ]
@@ -15,22 +30,6 @@ const boardOne = [
  * ┗ - ┗
  * https://en.wikipedia.org/wiki/Box-drawing_character
  */
-
-test("straightUpPipe is {type: 'straight', direction: 'up'}", () => {
-  expect(straightUpPipe).toEqual({type: 'straight', direction: 'up'})
-})
-
-test("curveUpPipe is {type: 'curve', direction: 'up'}", () => {
-  expect(curveUpPipe).toEqual({type: 'curve', direction: 'up'})
-})
-
-test("curveRightPipe is {type: 'curve', direction: 'right'}", () => {
-  expect(curveRightPipe).toEqual({type: 'curve', direction: 'right'})
-})
-
-test("straightRightPipe is {type: 'straight', direction: 'right'}", () => {
-  expect(straightRightPipe).toEqual({type: 'straight', direction: 'right'})
-})
 
 test("maybeConnectedIndexes(straightUpPipe, 6, 6) is [0, 12]", () => {
   expect(maybeConnectedIndexes(straightUpPipe, 6, 6)).toEqual([0, 12])
@@ -72,6 +71,89 @@ test("connectedIndexes(boardOne, 0, 3) is [1]", () => {
   expect(connectedIndexes(boardOne, 0, 3)).toEqual([1])
 })
 
-test("connectedIndexes(boardOne, 5, 3) is [8]", () => {
-  expect(connectedIndexes(boardOne, 5, 3)).toEqual([8])
+test("copyPipeColor(boardOne, 0, [1])[1].fillColor is colorMap.blue", () => {
+  expect(copyPipeColor(boardOne, 0, [1])[1].fillColor).toEqual(colorMap.blue)
+})
+
+test("filledPipeIndexes(boardOne) is [0]", () => {
+  expect(filledPipeIndexes(boardOne)).toEqual([0])
+})
+
+expectedResult = "{ 0: colorMap.blue, 1: colorMap.blue }"
+
+test(`indexesAsColorMap([0, 1], colorMap.blue) is ${expectedResult}`, () => {
+  expect(indexesAsColorMap([0, 1], colorMap.blue)).toEqual(
+    { 0: colorMap.blue, 1: colorMap.blue }
+  )
+})
+
+input = "connectedPipeIndexColorMap(boardOne, [0], 3)"
+
+test(`${input} is {1: colorMap.blue}`, () => {
+  expect(
+    connectedPipeIndexColorMap(boardOne, [0], 3)
+  ).toEqual({ 1: colorMap.blue })
+})
+
+input = "fillFromSources(boardOne, { 1: colorMap.blue })[1].fillColor"
+
+test(`${input} is colorMap.blue`, () => {
+  expect(
+    fillFromSources(boardOne, { 1: colorMap.blue })[1].fillColor
+  ).toEqual(colorMap.blue)
+})
+
+expectedResult = "{ ...straightRightPipe, fillColor: colorMap.blue }"
+
+test(`fillConnections(boardOne, 3)[1] is ${expectedResult}`, () => {
+  expect(fillConnections(boardOne, 3)[1]).toEqual(
+    { ...straightRightPipe, fillColor: colorMap.blue }
+  )
+})
+
+test("singlePathBoard() output looks right", () => {
+  expect(singlePathBoard(3, cornerSources)).toBeDefined()
+  expect(singlePathBoard(3, cornerSources)[0].type).toEqual('cap')
+  expect(singlePathBoard(3, cornerSources)[0].fillColor).toEqual(colorMap.blue)
+})
+
+test(`randomPipe() output looks right`, () => {
+  const output = randomPipe()
+  expect(output).toBeDefined()
+  expect(output).toHaveProperty('type')
+  expect(output).toHaveProperty('direction')
+  expect(output).toHaveProperty('fillColor')
+  expect(output.fillColor).toEqual(colorMap.white)
+})
+
+test(`randomBoard(3, cornerSources) output looks right`, () => {
+  const output = randomBoard(3, cornerSources)
+  const first = output[0]
+  expect(output).toBeDefined()
+  expect(output).toHaveLength(9)
+  expect(first).toHaveProperty('type')
+  expect(first).toHaveProperty('direction')
+  expect(first).toHaveProperty('fillColor')
+  expect(first.fillColor).toEqual(colorMap.blue)
+})
+
+test(`centerSource() output looks right`, () => {
+  expect(centerSource(3)).toEqual({ 4: colorMap.blue })
+  expect(centerSource(5)).toEqual({ 12: colorMap.blue })
+})
+
+test(`randomPipeType() output looks right`, () => {
+  const output = randomPipeType()
+  expect(output).toBeDefined()
+})
+
+test(`randomNextPipeOnBoard() output looks right`, () => {
+  const board = [curveUpPipe, straightRightPipe]
+  const output = randomNextPipeOnBoard(3, colorMap.blue, board)
+  expect(output).toBeDefined()
+})
+
+test(`emptyPipes() output looks right`, () => {
+  const output = emptyPipes(boardOne)
+  expect(output).toBeDefined()
 })

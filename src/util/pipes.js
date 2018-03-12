@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types'
 
-import { randomFromList, removeListFromList, sortNumber } from './general'
+import {
+  randomFromList, removeKeysFromObject, removeListFromList, sortNumber,
+} from './general'
 
 const pipeTypeMap = {
   0: 'curve',
@@ -31,6 +33,18 @@ const directionToRotate = {
   down: 180,
   left: -90,
 }
+
+const colorMap = {
+  blue: '#99ccff',
+  white: '#ffffff',
+}
+
+const colorMapReversed = {
+  '#99ccff': 'blue',
+  '#ffffff': 'white',
+}
+
+const fillColors = ['blue']
 
 const pipeConnections = {
   'curve-up': ['up', 'right'],
@@ -141,7 +155,7 @@ const directionKeys = Object.keys(directionMap)
 const randomPipeType = () => randomFromList(pipeTypeKeys)
 const randomDirection = () => randomFromList(directionKeys)
 
-const randomPipe = (fillColor = '#ffffff') => ({
+const randomPipe = (fillColor = colorMap.white) => ({
   type: pipeTypeMap[randomPipeType()],
   direction: directionMap[randomDirection()],
   fillColor,
@@ -150,12 +164,12 @@ const randomPipe = (fillColor = '#ffffff') => ({
 const centerSource = (perRow) => {
   const centerIndex = Math.floor((perRow * perRow) / 2)
   return {
-    [centerIndex]: '#99ccff',
+    [centerIndex]: colorMap.blue,
   }
 }
 
 const cornerSources = {
-  0: '#99ccff',
+  0: colorMap.blue,
 }
 
 const randomBoard = (perRow, sources, board = []) => {
@@ -229,7 +243,7 @@ const randomNextPipeOnBoard = (perRow, sourceColor, board) => {
   return {
     type: pipe[0],
     direction: pipe[1],
-    fillColor: '#ffffff',
+    fillColor: colorMap.white,
   }
 }
 
@@ -246,7 +260,7 @@ const singlePathBoard = (perRow, sources, board = []) => {
       [{
         type: 'cap',
         direction: 'right',
-        fillColor: sources[0].fillColor,
+        fillColor: sources[0],
       }],
     )
   }
@@ -263,23 +277,61 @@ const singlePathBoard = (perRow, sources, board = []) => {
 const emptyPipes = pipes => pipes.map(pipe => ({
   type: pipe.type,
   direction: pipe.direction,
-  fillColor: '#ffffff',
+  fillColor: colorMap.white,
 }))
 
-const uncheckedConnectedIndexes = (pipes, connection, perRow, unchecked) =>
-  connectedIndexes(pipes, connection, perRow)
-    .filter(edge => unchecked.includes(parseInt(edge, 10)))
+const fillFromSources = (pipes, sources) => pipes.map((pipe, index) => ({
+  type: pipe.type,
+  direction: pipe.direction,
+  fillColor:
+    (typeof sources[index] !== 'undefined') ? sources[index] : pipe.fillColor,
+}))
 
-const copyPipeColor = (pipes, from, to) =>
-  pipes.map((pipe, index) => {
-    if (to.includes(index)) {
-      return {...pipe, fillColor: pipes[from].fillColor}
-    }
-    return pipe
-  })
+const filledPipeIndexes = pipes => pipes.reduce(
+  (indexes, pipe, index) => (
+    fillColors.includes(
+      colorMapReversed[pipe.fillColor],
+    ) ? [...indexes, index] : indexes
+  ), [],
+)
+
+const indexesAsColorMap = (indexes, color) => indexes.reduce(
+  (current, index) => ({ ...current, [index]: color }),
+  {},
+)
+
+const connectedPipeIndexColorMap = (pipes, filled, perRow) => filled.reduce(
+  (connected, filledIndex) => ({
+    ...connected,
+    ...indexesAsColorMap(
+      connectedIndexes(pipes, filledIndex, perRow),
+      pipes[filledIndex].fillColor,
+    ),
+  }),
+  {},
+)
+
+const fillConnections = (pipes, perRow) => {
+  const filled = filledPipeIndexes(pipes)
+  const connected = connectedPipeIndexColorMap(pipes, filled, perRow)
+  const unfilledConnected = removeKeysFromObject(connected, filled)
+  if (Object.keys(unfilledConnected).length > 0) {
+    return fillConnections(fillFromSources(pipes, unfilledConnected), perRow)
+  }
+  return pipes
+}
+
+const copyPipeColor = (pipes, from, to) => pipes.map((pipe, index) => {
+  if (to.includes(index)) {
+    return { ...pipe, fillColor: pipes[from].fillColor }
+  }
+  return pipe
+})
 
 export {
   centerSource,
+  colorMap,
+  connectedPipeIndexColorMap,
   copyPipeColor,
   cornerSources,
   connectedIndexes,
@@ -287,11 +339,16 @@ export {
   directionMapReversed,
   directionToRotate,
   emptyPipes,
+  fillConnections,
+  fillFromSources,
+  filledPipeIndexes,
+  indexesAsColorMap,
   maybeConnectedIndexes,
   pipePropTypes,
   pipeTypeMap,
   randomBoard,
+  randomNextPipeOnBoard,
   randomPipe,
+  randomPipeType,
   singlePathBoard,
-  uncheckedConnectedIndexes,
 }
