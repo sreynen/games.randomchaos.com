@@ -8,7 +8,7 @@
     "build": "webpack --env.production ",
     "test": "jest",
     "test-coverage": "jest -- coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "travis-check": "npm run lint && npm test-coverage"
+    "travis-check": "npm run lint && npm run test-coverage"
   },
   "author": "",
   "license": "MIT",
