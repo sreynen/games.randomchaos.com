@@ -6,8 +6,9 @@
     "dev": "webpack-dev-server --watch-poll",
     "lint": "eslint --ext .jsx --ext .js -f compact src",
     "build": "webpack --env.production ",
-    "test": "jest && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "lint-and-test": "npm run lint && npm test"
+    "test": "jest",
+    "test-coverage": "jest -- coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "travis-check": "npm run lint && npm test-coverage"
   },
   "author": "",
   "license": "MIT",

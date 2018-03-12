@@ -1,7 +1,7 @@
 language: node_js
 node_js:
 - 9.5.0
-script: npm run lint-and-test
+script: npm run travis-check
 before_deploy: npm run build
 deploy:
   provider: s3
