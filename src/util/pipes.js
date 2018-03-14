@@ -44,6 +44,11 @@ const colorMapReversed = {
   '#ffffff': 'white',
 }
 
+const fadedColorMap = {
+  blue: '#bbeeff',
+  white: '#ffffff',
+}
+
 const fillColors = ['blue']
 
 const pipeConnections = {
@@ -149,6 +154,29 @@ const connectedIndexes = (pipes, index, perRow) =>
     connected => maybeConnectedIndexes(pipes[connected], connected, perRow)
       .includes(parseInt(index, 10)),
   )
+
+const partialConnectionIndexes = (pipes, perRow) => pipes.reduce(
+  (partials, pipe, index) => {
+    const pipeKey = `${pipe.type}-${pipe.direction}`
+    const fullConnects = connectedIndexes(pipes, index, perRow)
+    const potentialConnects = pipeConnections[pipeKey]
+    if (fullConnects.length === potentialConnects.length) {
+      return partials
+    }
+    return [...partials, index]
+  },
+  [],
+)
+
+const fadeColor = color => fadedColorMap[colorMapReversed[color]]
+
+const fadePartialConnections = (pipes, perRow) => {
+  const partials = partialConnectionIndexes(pipes, perRow)
+  return pipes.map((pipe, index) => (
+    partials.includes(index) ?
+      { ...pipe, fillColor: fadeColor(pipe.fillColor) } : pipe
+  ))
+}
 
 const pipeTypeKeys = Object.keys(pipeTypeMap)
 const directionKeys = Object.keys(directionMap)
@@ -339,11 +367,14 @@ export {
   directionMapReversed,
   directionToRotate,
   emptyPipes,
+  fadedColorMap,
+  fadePartialConnections,
   fillConnections,
   fillFromSources,
   filledPipeIndexes,
   indexesAsColorMap,
   maybeConnectedIndexes,
+  partialConnectionIndexes,
   pipePropTypes,
   pipeTypeMap,
   randomBoard,

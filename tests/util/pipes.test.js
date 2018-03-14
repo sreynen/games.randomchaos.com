@@ -1,8 +1,9 @@
 import {
   centerSource, colorMap, connectedIndexes, connectedPipeIndexColorMap,
-  copyPipeColor, cornerSources, emptyPipes, fillConnections, fillFromSources,
-  filledPipeIndexes, indexesAsColorMap, maybeConnectedIndexes, pipeTypeMap,
-  randomBoard, randomNextPipeOnBoard, randomPipe, randomPipeType,
+  copyPipeColor, cornerSources, emptyPipes, fadedColorMap,
+  fadePartialConnections, fillConnections, fillFromSources, filledPipeIndexes,
+  indexesAsColorMap, maybeConnectedIndexes, partialConnectionIndexes,
+  pipeTypeMap, randomBoard, randomNextPipeOnBoard, randomPipe, randomPipeType,
   singlePathBoard,
 } from '../../src/util/pipes'
 
@@ -19,17 +20,31 @@ const curveRightPipe = {
 const straightRightPipe = {
   type: 'straight', direction: 'right', fillColor: colorMap.white
 }
+const capRightPipe = {
+  type: 'cap', direction: 'right', fillColor: colorMap.white
+}
 const boardOne = [
   { ...curveUpPipe, fillColor: colorMap.blue }, straightRightPipe, curveUpPipe,
   straightUpPipe, curveUpPipe, straightUpPipe,
   curveUpPipe, straightRightPipe, curveUpPipe,
 ]
 /**
- * ┗ - ┗
- * | ┗ |
- * ┗ - ┗
+ * ╚ ═ ╚
+ * ║ ╚ ║
+ * ╚ ═ ╚
  * https://en.wikipedia.org/wiki/Box-drawing_character
  */
+ const boardTwo = [
+   { ...capRightPipe, fillColor: colorMap.blue }, straightRightPipe, curveUpPipe,
+   straightUpPipe, curveUpPipe, straightUpPipe,
+   curveUpPipe, straightRightPipe, curveUpPipe,
+ ]
+ /**
+  * ╞ ═ ╚
+  * ║ ╚ ║
+  * ╚ ═ ╚
+  * https://en.wikipedia.org/wiki/Box-drawing_character
+  */
 
 test("maybeConnectedIndexes(straightUpPipe, 6, 6) is [0, 12]", () => {
   expect(maybeConnectedIndexes(straightUpPipe, 6, 6)).toEqual([0, 12])
@@ -103,12 +118,17 @@ test(`${input} is colorMap.blue`, () => {
   ).toEqual(colorMap.blue)
 })
 
-expectedResult = "{ ...straightRightPipe, fillColor: colorMap.blue }"
-
-test(`fillConnections(boardOne, 3)[1] is ${expectedResult}`, () => {
+test("fillConnections() output looks right", () => {
+  const board = boardOne.map(pipe => ({...pipe}))
+  board[6].fillColor = colorMap.blue
+  const output = fillConnections(board, 3)
   expect(fillConnections(boardOne, 3)[1]).toEqual(
     { ...straightRightPipe, fillColor: colorMap.blue }
   )
+  expect(output[1].fillColor).toEqual(colorMap.blue)
+  expect(output[6].fillColor).toEqual(colorMap.blue)
+  expect(output[3].fillColor).toEqual(colorMap.blue)
+  expect(output[7].fillColor).toEqual(colorMap.blue)
 })
 
 test("singlePathBoard() output looks right", () => {
@@ -156,4 +176,27 @@ test(`randomNextPipeOnBoard() output looks right`, () => {
 test(`emptyPipes() output looks right`, () => {
   const output = emptyPipes(boardOne)
   expect(output).toBeDefined()
+})
+
+test(`partialConnectionIndexes() output looks right`, () => {
+  const board = boardOne.map(pipe => ({...pipe}))
+  const output = partialConnectionIndexes(boardOne, 3)
+  board[6].fillColor = colorMap.blue
+  const outputTwo = partialConnectionIndexes(board, 3)
+  expect(output).toEqual([0, 1, 2, 3, 4, 5, 7, 8])
+  expect(outputTwo).toEqual([0, 1, 2, 3, 4, 5, 7, 8])
+})
+
+test(`fadePartialConnections() output looks right`, () => {
+  const board = boardOne.map(pipe => ({...pipe}))
+  board[6].fillColor = colorMap.blue
+  const output = fadePartialConnections(fillConnections(board, 3), 3)
+  const outputTwo = fadePartialConnections(fillConnections(boardTwo, 3), 3)
+  expect(output).toBeDefined()
+  expect(output[0].fillColor).toEqual(fadedColorMap.blue)
+  expect(output[1].fillColor).toEqual(fadedColorMap.blue)
+  expect(output[6].fillColor).toEqual(colorMap.blue)
+  expect(outputTwo).toBeDefined()
+  expect(outputTwo[0].fillColor).toEqual(colorMap.blue)
+  expect(outputTwo[1].fillColor).toEqual(fadedColorMap.blue)
 })

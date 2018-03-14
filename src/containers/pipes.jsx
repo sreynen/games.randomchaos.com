@@ -2,7 +2,7 @@ import React from 'react'
 
 import {
   cornerSources, directionMap, directionMapReversed, emptyPipes,
-  fillConnections, fillFromSources, singlePathBoard,
+  fadePartialConnections, fillConnections, fillFromSources, singlePathBoard,
 } from '../util/pipes'
 import PipesBoard from '../components/svg/pipes/board.svg'
 
@@ -27,11 +27,10 @@ class Pipes extends React.Component {
   }
 
   updateFillColors(pipes) {
-    return fillConnections(
-      fillFromSources(
-        emptyPipes(pipes), this.state.sources,
-      ), this.state.perRow,
-    )
+    const empty = emptyPipes(pipes)
+    const sourcesFilled = fillFromSources(empty, this.state.sources)
+    const connectionsFilled = fillConnections(sourcesFilled, this.state.perRow)
+    return fadePartialConnections(connectionsFilled, this.state.perRow)
   }
 
   pipeClickHandler(x, y) {
